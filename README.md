@@ -4,7 +4,7 @@ Standalone [Model Context Protocol](https://modelcontextprotocol.io) server for 
 
 **Read-only:** `SELECT` / `WITH` only. No writes.
 
-**Auth:** single API key (`Authorization: Bearer …` or `X-API-Key`).
+**Auth:** none — `/mcp` is open (use a private URL + read-only DB user; do not expose broadly).
 
 ## Tools
 
@@ -24,46 +24,33 @@ Standalone [Model Context Protocol](https://modelcontextprotocol.io) server for 
 ```bash
 cd data-copilot-mcp
 cp .env.example .env
-# Edit .env: DATA_COPILOT_MCP_API_KEY, DATABASE_URL, R2_* …
+# Edit .env: DATABASE_URL, R2_* …
 
 npm install
 npm run dev
 ```
 
-Health: `GET http://localhost:8080/health` (no auth)
+Health: `GET http://localhost:8080/health`
 
-MCP: `POST http://localhost:8080/mcp` with header:
-
-```http
-Authorization: Bearer your-secret-key
-```
+MCP: `POST http://localhost:8080/mcp` (no headers required)
 
 ## Railway
 
-Deploys via **Dockerfile** (avoids Nixpacks double-`npm ci` / `EBUSY` on `node_modules/.cache`).
+Deploys via **Dockerfile**.
 
-1. New service → GitHub repo **`vercatryx/mcp-scn-demo`** (repo root is this package).
-2. Variables:
-   - `DATA_COPILOT_MCP_API_KEY` — long random string
-   - `DATABASE_URL` — Postgres URI (prefer a **read-only** DB user)
-   - `R2_*` + `R2_PUBLIC_DOMAIN` — required for Excel exports
-   - `MCP_ALLOWED_HOSTS` — e.g. `your-app.up.railway.app`
-   - Optional `DATA_DICTIONARY_PATH` if the dictionary file is not in the default monorepo path
-3. Deploy; note the public URL: `https://your-app.up.railway.app/mcp`
+1. GitHub repo **`vercatryx/mcp-scn-demo`**
+2. Variables: `DATABASE_URL`, `R2_*`, optional `MCP_ALLOWED_HOSTS`
+3. URL: `https://your-app.up.railway.app/mcp`
 
 ## ChatGPT
 
-1. Enable **Developer mode** (or build a connector in settings).
-2. Add MCP server URL: `https://your-app.up.railway.app/mcp`
-3. Authentication: **API key / Bearer** → paste the same value as `DATA_COPILOT_MCP_API_KEY`.
-
-Tell the model to read the `database-schema` resource before querying.
+1. Add connector URL: `https://your-app.up.railway.app/mcp`
+2. Authentication: **None** (no API key)
 
 ## Security
 
-- Use a **read-only** Postgres role when possible.
-- Rotate `DATA_COPILOT_MCP_API_KEY` if leaked.
-- Do not expose this URL publicly without a strong key; consider IP restrictions on Railway if available.
+- Use a **read-only** Postgres role.
+- Anyone with the URL can query your database — keep the Railway URL private.
 
 ## Regenerate schema docs
 
@@ -72,5 +59,3 @@ From `demo-food`:
 ```bash
 npm run db:docs
 ```
-
-The MCP server reads `demo-food/docs/DATABASE_DATA_DICTIONARY.md` by default when deployed from the monorepo.

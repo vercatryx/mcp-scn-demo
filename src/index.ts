@@ -1,6 +1,5 @@
 import { createMcpExpressApp } from '@modelcontextprotocol/sdk/server/express.js';
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
-import { requireApiKey } from './auth.js';
 import { createDataCopilotMcpServer } from './mcp-server.js';
 import { isPostgresConfigured } from './lib/read-sql.js';
 
@@ -33,7 +32,7 @@ app.get('/health', (_req, res) => {
     });
 });
 
-app.post('/mcp', requireApiKey, async (req, res) => {
+app.post('/mcp', async (req, res) => {
     const server = createDataCopilotMcpServer();
     try {
         const transport = new StreamableHTTPServerTransport({
@@ -57,7 +56,7 @@ app.post('/mcp', requireApiKey, async (req, res) => {
     }
 });
 
-app.get('/mcp', requireApiKey, (_req, res) => {
+app.get('/mcp', (_req, res) => {
     res.status(405).json({
         jsonrpc: '2.0',
         error: { code: -32000, message: 'Method not allowed. Use POST.' },
@@ -65,7 +64,7 @@ app.get('/mcp', requireApiKey, (_req, res) => {
     });
 });
 
-app.delete('/mcp', requireApiKey, (_req, res) => {
+app.delete('/mcp', (_req, res) => {
     res.status(405).json({
         jsonrpc: '2.0',
         error: { code: -32000, message: 'Method not allowed.' },
@@ -75,10 +74,7 @@ app.delete('/mcp', requireApiKey, (_req, res) => {
 
 app.listen(port, host, () => {
     console.log(`[data-copilot-mcp] listening on http://${host}:${port}`);
-    console.log(`[data-copilot-mcp] MCP endpoint: POST /mcp (Bearer API key)`);
-    if (!process.env.DATA_COPILOT_MCP_API_KEY?.trim()) {
-        console.warn('[data-copilot-mcp] WARNING: DATA_COPILOT_MCP_API_KEY is not set');
-    }
+    console.log(`[data-copilot-mcp] MCP endpoint: POST /mcp (no auth)`);
     if (!isPostgresConfigured()) {
         console.warn('[data-copilot-mcp] WARNING: DATABASE_URL is not configured');
     }
