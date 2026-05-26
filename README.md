@@ -40,7 +40,9 @@ Authorization: Bearer your-secret-key
 
 ## Railway
 
-1. New service → repo root **`data-copilot-mcp`** (or monorepo with root directory set to `data-copilot-mcp`).
+Deploys via **Dockerfile** (avoids Nixpacks double-`npm ci` / `EBUSY` on `node_modules/.cache`).
+
+1. New service → GitHub repo **`vercatryx/mcp-scn-demo`** (repo root is this package).
 2. Variables:
    - `DATA_COPILOT_MCP_API_KEY` — long random string
    - `DATABASE_URL` — Postgres URI (prefer a **read-only** DB user)

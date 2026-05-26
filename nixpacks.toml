@@ -1,0 +1,14 @@
+# Fallback if Railway uses Nixpacks instead of Dockerfile.
+# Install includes devDependencies (TypeScript); build does not re-run npm ci.
+
+[phases.install]
+cmds = ["npm ci"]
+
+[phases.build]
+cmds = ["npm run build"]
+
+[start]
+cmd = "npm start"
+
+[variables]
+NPM_CONFIG_PRODUCTION = "false"
